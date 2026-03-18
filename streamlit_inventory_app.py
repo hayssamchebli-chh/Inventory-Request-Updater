@@ -79,7 +79,7 @@ def process_files(request_file, stock_file) -> bytes:
     request_ws = request_wb[request_wb.sheetnames[0]]
     stock_ws = stock_wb[stock_wb.sheetnames[0]]
 
-    request_header_row = find_header_row(request_ws, ["No.", "Qty Requested"])
+    request_header_row = find_header_row(request_ws, ["No.2", "Qty Requested"])
     stock_header_row = find_header_row(
         stock_ws,
         ["Item No.1", "Stock Available Quantity", "Lead Time Delivery"],
