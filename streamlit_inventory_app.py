@@ -88,7 +88,7 @@ def process_files(request_file, stock_file) -> bytes:
     request_cols = build_column_map(request_ws, request_header_row)
     stock_cols = build_column_map(stock_ws, stock_header_row)
 
-    req_item_col = request_cols["No."]
+    req_item_col = request_cols["No.2"]
     req_qty_col = request_cols["Qty Requested"]
     lead_time_col = find_or_create_lead_time_column(request_ws, request_header_row)
 
