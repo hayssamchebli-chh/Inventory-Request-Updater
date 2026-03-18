@@ -127,7 +127,7 @@ def process_files(request_file, stock_file) -> bytes:
         if (
             requested_qty is not None
             and available_qty is not None
-            and requested_qty < available_qty
+            and requested_qty > available_qty
         ):
             fill_row(request_ws, row_idx, max_used_col, YELLOW_FILL)
 
