@@ -110,30 +110,26 @@ def process_files(request_file, stock_file) -> bytes:
     for row_idx in range(request_header_row + 1, request_ws.max_row + 1):
         item_no = normalize(request_ws.cell(row=row_idx, column=req_item_col).value)
         requested_qty = to_number(request_ws.cell(row=row_idx, column=req_qty_col).value)
-
+    
         clear_row_fills(request_ws, row_idx, max_used_col)
         request_ws.cell(row=row_idx, column=lead_time_col).value = None
-
+    
         if not item_no:
             continue
-
+    
         if item_no not in stock_data:
             fill_row(request_ws, row_idx, max_used_col, RED_FILL)
             continue
-
+    
         available_qty, lead_time = stock_data[item_no]
-        request_ws.cell(row=row_idx, column=lead_time_col, value=lead_time)
-
+    
         if (
             requested_qty is not None
             and available_qty is not None
             and requested_qty > available_qty
         ):
             fill_row(request_ws, row_idx, max_used_col, YELLOW_FILL)
-
-    request_ws.column_dimensions[
-        request_ws.cell(row=request_header_row, column=lead_time_col).column_letter
-    ].width = 20
+            request_ws.cell(row=row_idx, column=lead_time_col, value=lead_time)
 
     output = io.BytesIO()
     request_wb.save(output)
