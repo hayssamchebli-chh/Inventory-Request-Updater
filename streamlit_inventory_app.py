@@ -62,6 +62,15 @@ def find_or_create_lead_time_column(ws, header_row: int) -> int:
     return new_col
 
 
+def find_or_create_column(ws, header_row: int, column_name: str) -> int:
+    for cell in ws[header_row]:
+        if normalize(cell.value).casefold() == column_name.casefold():
+            return cell.column
+
+    new_col = ws.max_column + 1
+    ws.cell(row=header_row, column=new_col, value=column_name)
+    return new_col
+
 def clear_row_fills(ws, row_idx: int, max_col: int) -> None:
     for col_idx in range(1, max_col + 1):
         ws.cell(row=row_idx, column=col_idx).fill = PatternFill(fill_type=None)
@@ -90,12 +99,14 @@ def process_files(request_file, stock_file) -> bytes:
 
     req_item_col = request_cols["No.2"]
     req_qty_col = request_cols["Qty Requested"]
-    lead_time_col = find_or_create_lead_time_column(request_ws, request_header_row)
-
+    available_col = find_or_create_column(request_ws, request_header_row, "Available Quantity")
+    lead_time_col = find_or_create_column(request_ws, request_header_row, "Lead Time Delivery")
+    
     stock_item_col = stock_cols["Item No.1"]
     stock_qty_col = stock_cols["Stock Available Quantity"]
     stock_lead_time_col = stock_cols["Lead Time Delivery"]
 
+    
     stock_data: Dict[str, Tuple[Optional[float], object]] = {}
     for row_idx in range(stock_header_row + 1, stock_ws.max_row + 1):
         item_no = normalize(stock_ws.cell(row=row_idx, column=stock_item_col).value)
@@ -113,6 +124,7 @@ def process_files(request_file, stock_file) -> bytes:
     
         clear_row_fills(request_ws, row_idx, max_used_col)
         request_ws.cell(row=row_idx, column=lead_time_col).value = None
+        request_ws.cell(row=row_idx, column=available_col).value = None
     
         if not item_no:
             continue
@@ -122,6 +134,9 @@ def process_files(request_file, stock_file) -> bytes:
             continue
     
         available_qty, lead_time = stock_data[item_no]
+    
+        # ✅ Always write available quantity if item exists
+        request_ws.cell(row=row_idx, column=available_col, value=available_qty)
     
         if (
             requested_qty is not None
